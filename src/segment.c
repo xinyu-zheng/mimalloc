@@ -429,7 +429,6 @@ static void mi_segment_os_free(mi_segment_t* segment, mi_segments_tld_t* tld) {
   const size_t csize = _mi_commit_mask_committed_size(&segment->commit_mask, size);
 
   _mi_arena_free(segment, mi_segment_size(segment), csize, segment->memid);
-  GC_remove_roots(segment, segment + size);
 }
 
 /* -----------------------------------------------------------
@@ -888,7 +887,6 @@ static mi_segment_t* mi_segment_os_alloc( size_t required, size_t page_alignment
 
   mi_segments_track_size((long)(segment_size), tld);
   _mi_segment_map_allocated_at(segment);
-  GC_add_roots(segment, segment + segment_size);
   return segment;
 }
 
@@ -1072,6 +1070,10 @@ void _mi_segment_page_free(mi_page_t* page, bool force, mi_segments_tld_t* tld)
     // perform delayed purges
     mi_segment_try_purge(segment, false /* force? */);
   }
+
+  void* start = mi_page_start(page);
+  void* end   = (uint8_t*)start + (page->capacity * mi_page_block_size(page));
+  GC_remove_roots(start, end);
 }
 
 

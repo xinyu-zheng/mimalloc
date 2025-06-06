@@ -674,6 +674,10 @@ static void mi_page_extend_free(mi_heap_t* heap, mi_page_t* page, mi_tld_t* tld)
   page->capacity += (uint16_t)extend;
   mi_stat_increase(tld->stats.page_committed, extend * bsize);
   mi_assert_expensive(mi_page_is_valid_init(page));
+
+  void* start   = mi_page_start(page) + ((page->capacity - (uint16_t)extend) * mi_page_block_size(page));
+  void* end   = (uint8_t*)start + (page->capacity * mi_page_block_size(page));
+  GC_add_roots(start, end);
 }
 
 // Initialize a fresh page
@@ -1039,5 +1043,10 @@ void* _mi_malloc_generic(mi_heap_t* heap, size_t size, bool zero, size_t huge_al
   if (page->reserved == page->used) {
     mi_page_to_full(page, mi_page_queue_of(page));
   }
+
+  void* start = mi_page_start(page);
+  void* end   = (uint8_t*)start + (page->capacity * mi_page_block_size(page));
+  GC_add_roots(start, end);
+
   return p;
 }
