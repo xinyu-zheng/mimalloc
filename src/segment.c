@@ -1051,6 +1051,11 @@ static mi_slice_t* mi_segment_page_clear(mi_page_t* page, mi_segments_tld_t* tld
 void _mi_segment_page_free(mi_page_t* page, bool force, mi_segments_tld_t* tld)
 {
   mi_assert(page != NULL);
+
+  void* start = mi_page_start(page);
+  void* end   = (uint8_t*)start + (page->capacity * mi_page_block_size(page));
+  GC_remove_roots(start, end);
+
   mi_segment_t* segment = _mi_page_segment(page);
   mi_assert_expensive(mi_segment_is_valid(segment,tld));
 
@@ -1070,10 +1075,6 @@ void _mi_segment_page_free(mi_page_t* page, bool force, mi_segments_tld_t* tld)
     // perform delayed purges
     mi_segment_try_purge(segment, false /* force? */);
   }
-
-  void* start = mi_page_start(page);
-  void* end   = (uint8_t*)start + (page->capacity * mi_page_block_size(page));
-  GC_remove_roots(start, end);
 }
 
 
