@@ -1075,8 +1075,8 @@ void _mi_segment_page_free(mi_page_t* page, bool force, mi_segments_tld_t* tld)
   void* end   = (uint8_t*)start + (page->capacity * mi_page_block_size(page));
   GC_remove_roots(start, end);
 
-  size_t size = (uintptr_t)end - (uintptr_t)start;
-  printf("Removing GC roots from %p to %p (size: %zu bytes)\n", start, end, size);
+  size_t roots_size = (uintptr_t)end - (uintptr_t)start;
+  printf("Removing GC roots from %p to %p (size: %zu bytes)\n", start, end, roots_size);
 }
 
 
