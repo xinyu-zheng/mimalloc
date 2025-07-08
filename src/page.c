@@ -680,6 +680,9 @@ static void mi_page_extend_free(mi_heap_t* heap, mi_page_t* page, mi_tld_t* tld)
   void* start   = mi_page_start(page) + ((page->capacity - (uint16_t)extend) * mi_page_block_size(page));
   void* end   = (uint8_t*)start + (page->capacity * mi_page_block_size(page));
   GC_add_roots(start, end);
+
+  size_t size = (uintptr_t)end - (uintptr_t)start;
+  printf("Adding GC roots from %p to %p (size: %zu bytes) (extend)\n", start, end, size);
 }
 
 // Initialize a fresh page
@@ -1049,6 +1052,9 @@ void* _mi_malloc_generic(mi_heap_t* heap, size_t size, bool zero, size_t huge_al
   void* start = mi_page_start(page);
   void* end   = (uint8_t*)start + (page->capacity * mi_page_block_size(page));
   GC_add_roots(start, end);
+
+  size_t size = (uintptr_t)end - (uintptr_t)start;
+  printf("Adding GC roots from %p to %p (size: %zu bytes)\n", start, end, size);
 
   return p;
 }
